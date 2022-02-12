@@ -1,0 +1,147 @@
+<html>
+
+<canvas id="canvas">
+
+
+</canvas>
+<script>
+
+
+var canvas = document.getElementById("canvas")
+var context = canvas.getContext("2d")
+
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+
+var keymap = [];
+var player = {};
+var world = {};
+
+
+player.x = window.innerWidth / 2;
+player.y = window.innerHeight - 50;
+player.w = 21;
+player.h = 21;
+player.vx = 0;
+player.vy = 0;
+player.dampening = 0.1;
+player.bulletList = [];
+player.bullitIter = 0;
+
+player.shoot = function() {
+	player.bulletIter = player.bulletIter % 20;
+	player.bulletList[player.bulletIter] = Object.create(player);
+	player.bulletList[player.bulletIter].vy = -10
+	player.bulletList[player.bulletIter].vx = 0
+	player.bulletList[player.bulletIter].dampening = 0
+	player.bulletList[player.bulletIter].y = player.y - player.h
+	player.bulletList[player.bulletIter].x = player.x + (player.w / 2)
+	player.bulletList[player.bulletIter].w = 3;
+	player.bulletList[player.bulletIter].h = 9;
+	world.addObject(player.bulletList[player.bulletIter]);
+	player.bulletIter++;
+};
+
+
+player.draw = function() {
+	context.fillStyle = "#ffff00";
+	context.fillRect(this.x, this.y, this.w, this.h);
+};
+
+
+player.collides = function(point) {
+	if(this.x < point.x && (this.x + this.w) > point.x) {
+		if(this.y < point.y && (this.y + this.h) > point.y) {
+			return true;
+		}
+	}
+	return false;
+};
+
+
+world.objects = [];
+world.objects.push(player);
+world.objIter = 1;
+world.addObject = function(obj) {
+	world.objIter = world.objIter % 500;
+	if(world.objIter === 0) {
+		world.objIter++;
+	}
+	world.objects[world.objIter] = obj;
+	world.objIter++;
+};
+
+
+
+document.onkeydown = function(event) {
+	keymap[event.keyCode] = true;
+};
+
+document.onkeyup = function(event) {
+	keymap[event.keyCode] = false;
+};
+
+function clearScreen() {
+	context.fillStyle = "#0a0a0f";
+	context.fillRect(0, 0, window.innerWidth, window.innerHeight);
+};
+
+function input() {
+	if(keymap[87]){
+		player.shoot();
+	}
+	
+	if(keymap[83]){
+		
+	}
+	
+	if(keymap[65]){
+		player.vx = -5;
+	}
+	
+	if(keymap[68]){
+		player.vx = 5;
+	}
+};
+
+function update() {
+	for(var i = 0; i < world.objects.length; i++) {
+		if(world.objects[i].vx > 0) {
+			world.objects[i].vx -= world.objects[i].dampening
+		} else if(world.objects[i].vx < 0){
+			world.objects[i].vx += world.objects[i].dampening
+		}
+		world.objects[i].x += world.objects[i].vx
+		world.objects[i].y += world.objects[i].vy
+	}
+	
+	
+	
+};
+
+function render() {
+	for(var i = 0; i < world.objects.length; i++) {
+		world.objects[i].draw();
+	}
+};
+
+function gameLoop() {
+	clearScreen();
+	
+	input();
+	
+	update();
+	
+	render();
+	
+	window.requestAnimationFrame(gameLoop)
+};
+
+
+
+
+gameLoop();
+</script>
+
+
+</html>
